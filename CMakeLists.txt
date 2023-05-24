@@ -21,6 +21,10 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(dependencies/glfw)
 
+# GLM
+
+add_subdirectory(dependencies/glm)
+
 # General
   
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
@@ -46,4 +50,10 @@ target_link_directories(${PROJECT_NAME} PUBLIC
     ${GLFW_LIB}
 )
 
-target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan)
+target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan glm::glm)
+
+ADD_CUSTOM_TARGET(
+    shaderComp
+    COMMAND cmd /c C:/dev/ColdOpen/compile.bat
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} shaderComp)
