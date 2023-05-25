@@ -1,6 +1,3 @@
-// Sample by Sascha Willems
-// Contact: webmaster@saschawillems.de
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -222,7 +219,7 @@ private:
             drawFrame();
             // We want to animate the particle system using the last frames time to get smooth, frame-rate independent animation
             double currentTime = glfwGetTime();
-            lastFrameTime = (currentTime - lastTime) * 1000.0;
+            lastFrameTime = (float)((currentTime - lastTime) * 1000.0);
             lastTime = currentTime;
         }
 
@@ -1403,7 +1400,8 @@ private:
     }
 };
 
-int main() {
+int main() 
+{
     ComputeShaderApplication app;
 
     try {
