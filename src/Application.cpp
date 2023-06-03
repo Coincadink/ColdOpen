@@ -151,6 +151,9 @@ private:
     std::vector<VkBuffer> shaderStorageBuffers;
     std::vector<VkDeviceMemory> shaderStorageBuffersMemory;
 
+    std::vector<VkImage> shaderStorageImages;
+    std::vector<VkDeviceMemory> shaderStorageImagesMemory;
+
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
     std::vector<void*> uniformBuffersMapped;
@@ -261,7 +264,9 @@ private:
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device, shaderStorageBuffers[i], nullptr);
+            // vkDestroyImage(device, shaderStorageImages[i], nullptr);
             vkFreeMemory(device, shaderStorageBuffersMemory[i], nullptr);
+            // vkFreeMemory(device, shaderStorageImagesMemory[i], nullptr);
         }
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -777,8 +782,8 @@ private:
         }
     }
 
-    void createShaderStorageBuffers() {
-
+    void createShaderStorageBuffers() 
+    {
         // Initialize particles
         std::default_random_engine rndEngine((unsigned)time(nullptr));
         std::uniform_real_distribution<float> rndDist(0.0f, 1.0f);
@@ -818,7 +823,11 @@ private:
 
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingBufferMemory, nullptr);
+    }
 
+    void createShaderStorageImages()
+    {
+        createImage(imageType, format, extent, mipLevels, arrayLayers, samples, tiling, usage, initialLayout, properties, image, imageMemory);
     }
 
     void createUniformBuffers() {
@@ -835,7 +844,8 @@ private:
         }
     }
 
-    void createDescriptorPool() {
+    void createDescriptorPool() 
+    {
         std::array<VkDescriptorPoolSize, 2> poolSizes{};
         poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
@@ -913,14 +923,16 @@ private:
     }
 
 
-    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) 
+    {
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) 
+        {
             throw std::runtime_error("failed to create buffer!");
         }
 
@@ -932,14 +944,16 @@ private:
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) 
+        {
             throw std::runtime_error("failed to allocate buffer memory!");
         }
 
         vkBindBufferMemory(device, buffer, bufferMemory, 0);
     }
 
-    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) 
+    {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -958,6 +972,87 @@ private:
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
         vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
+
+        vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+    }
+
+    void createImage(VkImageType imageType, VkFormat format, VkExtent3D extent, uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage, VkImageLayout initialLayout, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
+    {
+        VkImageCreateInfo imageInfo{};
+        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imageInfo.imageType = imageType;
+        imageInfo.format = format;
+        imageInfo.extent = extent;
+        imageInfo.mipLevels = mipLevels;
+        imageInfo.arrayLayers = arrayLayers;
+        imageInfo.samples = samples;
+        imageInfo.tiling = tiling;
+        imageInfo.usage = usage;
+        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        imageInfo.initialLayout = initialLayout;
+
+        if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create image!");
+        }
+
+        VkMemoryRequirements memRequirements;
+        vkGetImageMemoryRequirements(device, image, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) 
+        {
+            throw std::runtime_error("failed to allocate image memory!");
+        }
+
+        vkBindImageMemory(device, image, imageMemory, 0);
+    }
+
+    void copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height)
+    {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = commandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo{};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkImageCopy copyRegion{};
+        copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        copyRegion.srcSubresource.mipLevel = 0;
+        copyRegion.srcSubresource.baseArrayLayer = 0;
+        copyRegion.srcSubresource.layerCount = 1;
+        copyRegion.srcOffset = {0, 0, 0};
+        copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        copyRegion.dstSubresource.mipLevel = 0;
+        copyRegion.dstSubresource.baseArrayLayer = 0;
+        copyRegion.dstSubresource.layerCount = 1;
+        copyRegion.dstOffset = {0, 0, 0};
+        copyRegion.extent = {width, height, 1};
+
+        vkCmdCopyImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copyRegion);
 
         vkEndCommandBuffer(commandBuffer);
 

@@ -26,6 +26,8 @@ void main()
 
     Particle particleIn = particlesIn[index];
 
+    particlesOut[index].position = particleIn.position * 1.01;
+    /*
     particlesOut[index].position = particleIn.position + particleIn.velocity.xy * ubo.deltaTime;
     particlesOut[index].velocity = particleIn.velocity;
 
@@ -36,4 +38,5 @@ void main()
     if ((particlesOut[index].position.y <= -1.0) || (particlesOut[index].position.y >= 1.0)) {
         particlesOut[index].velocity.y = -particlesOut[index].velocity.y;
     }
+    */
 }
