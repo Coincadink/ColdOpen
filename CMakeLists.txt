@@ -26,10 +26,11 @@ add_subdirectory(dependencies/glfw)
 add_subdirectory(dependencies/glm)
 
 # General
-  
-# file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
+file(GLOB_RECURSE HEADERS "src/*.hpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp")
  
-add_executable(${PROJECT_NAME} src/Entry.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
  
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
  
@@ -52,8 +53,8 @@ target_link_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan glm::glm)
 
-ADD_CUSTOM_TARGET(
-    shaderComp
-    COMMAND cmd /c C:/dev/ColdOpen/compile.bat
-)
-ADD_DEPENDENCIES(${PROJECT_NAME} shaderComp)
+#ADD_CUSTOM_TARGET(
+#    shaderComp
+#    COMMAND cmd /c C:/dev/ColdOpen/compile.bat
+#)
+#ADD_DEPENDENCIES(${PROJECT_NAME} shaderComp)

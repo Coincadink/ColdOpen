@@ -1,13 +1,20 @@
-#include "Application.cpp"
+#include "application.hpp"
 
-int main() 
+#include <cstdlib>
+#include <iostream>
+#include <stdexcept>
+
+int main()
 {
-    ComputeShaderApplication app;
+    Application app{};
 
-    try {
+    try
+    {
         app.run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
         return EXIT_FAILURE;
     }
 

@@ -1,6 +1,3 @@
 {
-    "files.associations": {
-        "chrono": "cpp",
-        "format": "cpp"
-    }
+    "C_Cpp.errorSquiggles": "disabled"
 }
