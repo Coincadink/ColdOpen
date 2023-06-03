@@ -1,6 +1,8 @@
 #pragma once
 
 #include "window.hpp"
+#include "pipeline.hpp"
+#include "device.hpp"
 
 class Application
 {
@@ -12,4 +14,6 @@ public:
 
 private:
     Window window{WIDTH, HEIGHT, "Hello Vulkan!"};
+    Device device{window};
+    Pipeline pipeline{device, "../../src/shaders/vert.spv", "../../src/shaders/frag.spv", Pipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
 };

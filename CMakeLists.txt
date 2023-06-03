@@ -53,8 +53,8 @@ target_link_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} glfw Vulkan::Vulkan glm::glm)
 
-#ADD_CUSTOM_TARGET(
-#    shaderComp
-#    COMMAND cmd /c C:/dev/ColdOpen/compile.bat
-#)
-#ADD_DEPENDENCIES(${PROJECT_NAME} shaderComp)
+ADD_CUSTOM_TARGET(
+    shaderComp
+    COMMAND cmd /c C:/dev/ColdOpen/compile.bat
+)
+ADD_DEPENDENCIES(${PROJECT_NAME} shaderComp)
