@@ -4,14 +4,8 @@ set(NAME ColdOpen)
 project(${NAME} VERSION 0.23.0)
  
 # Vulkan
-find_package(Vulkan REQUIRED)
-message(STATUS "Found Vulkan: $ENV{VULKAN_SDK}")
 
-if (NOT Vulkan_FOUND)
-    message(FATAL_ERROR "Could not find Vulkan library!")
-else()
-    message(STATUS "Using vulkan lib at: ${Vulkan_LIBRARIES}")
-endif()
+find_package(Vulkan REQUIRED)
  
 # GLFW
 
